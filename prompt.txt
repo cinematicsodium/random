@@ -1,0 +1,24 @@
+1. Analyze the provided code for clarity, structure, and functionality.
+    code: {
+"""
+    
+"""
+}
+2. Identify potential improvements, with a focus on:
+   - Refactoring the code into separate functions where needed.
+   - Renaming variables for improved readability and adherence to naming conventions.
+   - Optimizing data structures, types, and the overall code architecture.
+   - Ensuring maintainability and scalability through best coding practices.
+3. Refine and rewrite the code to incorporate the identified improvements.
+4. Present the final, optimized version of the code.
+
+....................................................................................................
+
+1. Analyze the provided prompt for clarity, structure, and functionality.
+    prompt: {
+"""
+
+"""}
+2. Identify potential improvements.
+3. Refine and rewrite the prompt to incorporate the identified improvements.
+4. Present the final, optimized version of the prompt.
