@@ -1,348 +1,272 @@
-from typing import Any, Dict, Generator, List, Union
-from dataclasses import dataclass, field
-from datetime import datetime
+from typing import Dict, Generator, List, Optional, Union
+from datetime import datetime, time, timedelta
+from pprint import pprint
 from pathlib import Path
 import shutil
-from webbrowser import get
-from click import group
-import fitz  # type: ignore
+import fitz #type: ignore
 import json
 import os
 
-from matplotlib import category
-from networkx import number_strongly_connected_components
 
-@dataclass
-class PDFData():
-    first_page_fields: Dict[str, str] = field(default_factory=dict)
-    mid_page_fields: Dict[str, str] = field(default_factory=dict)
-    last_page_fields: Dict[str, str] = field(default_factory=dict)
-    page_count: int = 0
-    category: str = ""
-    filename: str = ""
 
-@dataclass
-class StringAndIndex():
-    text: str = ""
-    index: int = 0
+_testing_: bool = False
+_example_: bool = False
+_print_data_: bool = True
+_write_xls_rows_: bool = True
+_insert_date_: bool = True
+_rename_move_file_: bool = True
+_update_serial_numbers_: bool = True
 
-@dataclass
-class AwardDetails():
-    date: str = ""
-    type: str = ""
-    nominator: str = ""
-    org: str = ""
-    justification: str = ""
-    value: StringAndIndex = field(default_factory=StringAndIndex)
-    extent: StringAndIndex = field(default_factory=StringAndIndex)
+if _example_:
+    _insert_date_ = False
+    _rename_move_file_ = False
+    _update_serial_numbers_ = False
 
-@dataclass
-class NomineeDetails():
-    name: str = ""
-    money: int = 0
-    hours: int = 0
+received_date_is_tomorrow: bool = False
+current_time = datetime.now().time()
+cutoff_time = time(14,45)
+if current_time > cutoff_time:
+    received_date_is_tomorrow = True
 
-@dataclass
-class IndividualAward(AwardDetails):
-    id: str = ""
-    category: str = "IND"
-    nominee: NomineeDetails = field(default_factory=NomineeDetails)
+PROCESSING_FOLDER: str = (
+    r"C:\processing"
+)
+FY24_FOLDER: str = (
+    r"X:\fy24"
+)
+TEST_FOLDER: str = (
+    r"C:\test"
+)
+AWARD_SER_NUMS: str = (
+    r"process_award_data\serial_numbers.txt"
+)
 
-@dataclass
-class GroupAward(AwardDetails):
-    category:  str = "GRP"
-    nominees: List[NomineeDetails] = field(default_factory=list)
+def validate_page_count(page_count: int) -> None:
+    min_page_count, max_page_count = 2, 5
+    if not (min_page_count <= page_count <= max_page_count):
+        raise ValueError(f"Page Count: {page_count} (not in range {min_page_count}-{max_page_count})")
 
-@dataclass
-class SerialNumber():
-    individual: int
-    group: int
+def validate_pay_plan(key: str, val: str) -> None:
+    if key.startswith("pay plan") \
+    and (
+        val.startswith("es") \
+        or \
+        val.startswith("ses")
+    ):
+        raise ValueError(f"Error: Excepted Service Employee\nPay Plan: {val.upper()}")
 
-class TextFormat():
-    title_prefixes: list[str] = ["Dr.", "Mr.", "Mrs.", "Miss.", "Ms.", "Prof.", "Rev.", "Hon.", "Sir", "Lady", "Capt.", "Col.", "Maj.", "Gen.", "Adm."]
-
-    @staticmethod
-    def justification(text: str) -> str:
-        cleaned_text = (
-            text.strip()
-            .encode("utf-8", errors="ignore")
-            .decode("ascii", errors="ignore")
-            .replace('"', "'")
-            .replace("  ", " ")
-        )
-        return f'"{cleaned_text}"'
-
-    @staticmethod
-    def name(name: str) -> str:
-        name = name.strip()
-        for prefix in TextFormat.title_prefixes:
-            name = name.replace(prefix, "")
-
-        split_name = [part for part in name.split(" ") \
-            if not (part.startswith('(') and part.endswith(')') \
-            or (part.startswith('"') and part.endswith('"')))
-        ]
-
-        if len(split_name) == 2:
-            if "," in split_name[0]:
-                return name.title()
-            elif "." not in name:
-                return f"{split_name[1]}, {split_name[0]}".title()
-        elif len(split_name) == 3 and "," not in split_name[0] and 1 <= len(split_name[1]) < 3:
-            return f"{split_name[2]}, {split_name[0]}".title()
-
-        return name.title()
-
-    @staticmethod
-    def numerical(text: str) -> int:
-        numeric_str = ''.join(char for char in text if char.isdigit() or char == '.')
-        numeric_int: int
-        try:
-            numeric_int = int(numeric_str)
-        except ValueError:
-            raise ValueError(f"Invalid numerical value: {text}")
-        return numeric_int
-
-def get_pdf_data(file: str) -> PDFData:
-    
-    def validate_page_count(page_count: int) -> None:
-        min_page_count, max_page_count = 2, 5
-        if page_count not in range(min_page_count, max_page_count + 1):
-            raise ValueError(f"Page count {page_count} is not within the valid range of {min_page_count}-{max_page_count}")
-
-    def is_valid_field_value(value: str) -> bool:
-        return all([
-            value == str(value),
-            not value.isspace(),
-            value != "",
-            value.lower() != "off",
-        ])
-    
-    pdf_info = PDFData()
-    with fitz.open(file) as doc:
+def get_pdf_fields(pdf_file: str) -> dict:
+    with fitz.open(pdf_file) as doc:
+        min_page_count: int = 2
+        max_page_count: int = 5
         page_count: int = doc.page_count
-        validate_page_count(page_count)
         first_page: int = 0
         last_page: int = page_count - 1
-        pdf_info.page_count = page_count
-        pdf_info.filename = os.path.basename(file)
-
+        pdf_fields: dict = {
+            "first_page": {},
+            "mid_pages": {},
+            "last_page": {},
+            "page_count": page_count,
+            "file_name": os.path.basename(pdf_file)
+        }
         field_count: int = 0
-        for page in doc:
-            page_num: int = page.number
-            fields = page.widgets()
-            for field in fields:
-                field_name: str = field.field_name.strip().lower()
-                field_value: str = field.field_value.strip()
 
-                if is_valid_field_value(field_value):
-                    field_count += 1
-                    if page_num == first_page:
-                        pdf_info.first_page_fields[field_name] = field_value
-                    elif page_num == last_page:
-                        pdf_info.last_page_fields[field_name] = field_value
-                    else:
-                        pdf_info.mid_page_fields[field_name] = field_value
+        if not (min_page_count <= page_count <= max_page_count):
+            raise ValueError(f"Page Count: {page_count} (not in range {min_page_count}-{max_page_count})\n")
+        elif page_count == 2:
+            pdf_fields["category"] = "IND"
+        else:
+            pdf_fields["category"] = "GRP"
+
+        for page in doc:
+            current_page: int = page.number
+            for field in page.widgets():
+                key: str = field.field_name.strip().lower()
+                val: str = field.field_value.strip()
+                if all([
+                    val == str(val),
+                    not str(val).isspace(),
+                    val != "",
+                    str(val).lower() != "off",
+                ]):
+                    if current_page == first_page:
+                        validate_pay_plan(key,val)
+                        pdf_fields["first_page"][key] = val
+                        field_count += 1
+                    elif current_page == last_page:
+                        pdf_fields["last_page"][key] = val
+                        field_count += 1
+                    elif first_page < current_page < last_page:
+                        pdf_fields["mid_pages"][key] = val
+                        field_count += 1
 
         if field_count <= 10:
-            raise ValueError(f"Insufficient number of PDF fields. Count: {field_count}")
+            error_field_count: str = f"Insufficient number of PDF fields. Count: {field_count}"
+            raise ValueError(error_field_count)
+        return pdf_fields
 
-    return pdf_info
 
-def get_serial_number() -> SerialNumber:
-    file: str = "serial_numbers.json"
-    with json.loads(open(file, "r").read()) as json_file:
-        return SerialNumber(
-            individual=json_file["IND"],
-            group=json_file["GRP"],
-        )
+def xjustification(field_text: str) -> str:
+    justif_str: str = (
+        field_text.strip()
+        .encode("utf-8", errors="ignore")
+        .decode("ascii", errors="ignore")
+        .replace('"', "'")
+        .replace("  "," ")
+    )
+    return '"' + justif_str + '"'
 
-def determine_received_date(first_page_fields: dict) -> str:
-    for k, v in first_page_fields["first_page"].items():
-        if k == "date received" and v.lower() != "today":
-            return v
-    return datetime.now().strftime("%Y-%m-%d")
 
-def determine_award_type(first_page_fields: dict, grp=False, ind=False) -> str:
-    type: str = ""
-    sas_fields: list[str] = ['hours_2','time off award','special act or service','undefined',]
-    ots_fields: list[str] = ['on the spot','hours',]
-    for field_name in first_page_fields.keys():
-        if field_name in sas_fields:
-            type = "SAS"
-            break
-        elif field_name in ots_fields:
-            type = "OTS"
-            break
-    if not type:
-        raise ValueError("Unable to determine the award type.")
-    return type
+def xname(field_text: str) -> str:
+    replacements: list[str] = ["Dr.","Mr.","Mrs.","Miss.","Ms."]
+    for i in replacements:
+        field_text.replace(i,"")
+    last_first: str = ""
+    if " " in field_text:
+        split_name = field_text.split()
+        for i in split_name:
+            if "(" in i and ")" in i or (i[0] == '"' == i[-1]):
+                split_name.remove(i)  # i == 'NickName' or (NickName)
+        if len(split_name) == 2:
+            if "," in split_name[0]:  # [0,1] = Last, First
+                last_first = field_text
+            elif (
+                "." not in field_text
+            ):  # [0,1] = First Last  -  not F. Last  -  not First L.
+                last_first = ", ".join([split_name[1], split_name[0]])
+        elif len(split_name) == 3:
+                if all(
+                    [
+                        "," not in split_name[0],
+                        1 <= len(split_name[1]) < 3,
+                    ]
+                ): # [0,1,2] = First M. Last  -  not F. M. Last  -  not First Middle Last
+                    last_first = ", ".join([split_name[2], split_name[0]])
+    return last_first.title() if last_first else field_text
+
+
+def xnumerical(field_text: str) -> float:
+    digits: str = "".join(i for i in field_text if any([i == ".", i.isdigit()]))
+    if not digits:
+        return 0
+    return float(digits)
+
+
+def ljust(text: str|int, int: int) -> str:
+    return str(text).ljust(int)
+
+
+def rjust(text: str|int, int: int) -> str:
+    return str(text).rjust(int)
+
 
 def get_nominator_name(first_page_fields: dict) -> str:
-    nominator: str = ""
     for field_name, field_text in first_page_fields.items():
         if field_name in ["please print", "nominators name"]:
-            nominator = TextFormat.name(field_text)
-            break
-    if not nominator:
-        raise ValueError("Nominator name not found.")
-    return nominator
+            return xname(field_text)
+    return ""
+
 
 def get_funding_org(first_page_fields: dict) -> str:
-    
-    def collect_divisions(first_page_fields: dict) -> list[str]:
-        divisions: list[str] = []
-        for field_name, field_value in first_page_fields.items():
-            if field_name.lower() in ("org_2", "organization_2"):
-                continue
-            if field_name.lower().startswith(("org_", "organization_")):
-                divisions.append(field_value.upper())
-        if not divisions:
-            raise ValueError("Org divisions not found.")
-        return divisions
+    pass
 
-    def define_funding_org(division_fields: list[str]) -> str:
-        funding_org: str = ""
-        aaa: list[str] = ['aaa-000', 'aaa-111', 'aaa-222', 'aaa-333', 'aaa-444']
-        bbb: list[str] = ['bbb-000', 'bbb-111', 'bbb-222', 'bbb-333', 'bbb-444']
-        ccc: list[str] = ['ccc-000', 'ccc-111', 'ccc-222', 'ccc-333', 'ccc-444']
-        ddd: list[str] = ['ddd-000', 'ddd-111', 'ddd-222', 'ddd-333', 'ddd-444']
-        eee: list[str] = ['eee-000', 'eee-111', 'eee-222', 'eee-333', 'eee-444']
-        orgs: list[str] = [aaa, bbb, ccc, ddd, eee]
-        for org in orgs:
-            main_org: str = org[0]
-            for div in org:
-                for division_field in division_fields:
-                    if div in division_field:
-                        if main_org == "aaa-000":
-                            funding_org = div
-                        else:
-                            funding_org = main_org
-                        break
-        return funding_org
 
-    division_fields: list[str] = collect_divisions(first_page_fields)
-    funding_org: str = define_funding_org(division_fields)
+def get_type(first_page_fields: dict, grp=False, ind=False) -> str:
+    if ind is True:
+        sas_fields: list[str] = ['hours_2','time off award','special act or service','undefined',]
+        for field_name in first_page_fields.keys():
+            if field_name in sas_fields:
+                return "SAS"
+        return "OTS"
+    elif grp is True:
+        ots_fields: list[str] = ['on the spot','hours',]
+        for field_name in first_page_fields.keys():
+            if field_name in ots_fields:
+                return "OTS"
+        return "SAS"
+    raise ValueError("Unable to determine the award type.")
 
-    if funding_org:
-        return funding_org
-    else:
-        funding_orgs: list[str] = ['aaa', 'bbb', 'ccc', 'ddd', 'eee']
-        divisions: str = "\n".join(f"- {i}" for i in division_fields)
-        orgs: str = "\n".join(f"{i}: {org}" for i,org in enumerate(funding_orgs))
-        funding_org_error_msg: str = f"""The following divisions could not be associated with a funding organization:\n{divisions}"""
-        print(funding_org_error_msg)
-        while True:
-            print(f"Please select a funding organization from the following list:\n{orgs}")
-            user_input: str = input(">>> ").strip()
-            if user_input == "":
-                raise ValueError("Unable to determine funding organization.")
-            try:
-                funding_org = funding_orgs[int(user_input)]
-                break
-            except ValueError:
-                print(f"Invalid input.")
-            except IndexError:
-                print(f"Invalid input.")
-    return funding_org
 
-def get_award_justification(last_page: dict) -> str:
+def get_justification(last_page: dict) -> str:
     for field_name, field_text in last_page.items():
         if "extent" in field_name:
-            return TextFormat.justification(field_text)
+            return xjustification(field_text)
     raise ValueError("Award justification not found.")
 
-def get_award_value(last_page_fields: dict) -> StringAndIndex:
-    value: StringAndIndex = StringAndIndex()
+def get_value_and_extent(last_page: dict) -> dict:
     value_choices: list[str] = ["moderate", "high", "exceptional"]
-    for field_name, field_text in last_page_fields.items():
-        if field_name in value_choices:
-            value = StringAndIndex(
-                text=field_text,
-                index=field_text.index(field_text)
-            )
-    return value
-
-def get_award_extent(last_page_fields: dict) -> StringAndIndex:
-    extent: StringAndIndex = StringAndIndex()
     extent_choices: list[str] = ["limited", "extended", "general"]
-    for field_name, field_text in last_page_fields.items():
-        if field_name in extent_choices:
-            extent = StringAndIndex(
-                text=field_text,
-                index=field_text.index(field_text)
-            )
-    return extent
+    value_extent_str_and_idx: dict = {}
+    page_fields = list(last_page.items())
 
-def process_award_details(PDFData: PDFData) -> AwardDetails:
-    award_details = AwardDetails(
-        date=determine_received_date(PDFData.first_page_fields),
-        type=determine_award_type(PDFData.first_page_fields),
-        nominator=get_nominator_name(PDFData.first_page_fields),
-        org=get_funding_org(PDFData.first_page_fields),
-        justification=get_award_justification(PDFData.last_page_fields),
-    )
-    award_value: StringAndIndex = get_award_value(PDFData.last_page_fields)
-    award_extent: StringAndIndex = get_award_extent(PDFData.last_page_fields)
-    if award_value.text and award_extent.text:
-        award_details.value = award_value
-        award_details.extent = award_extent
-    return award_details
+    for field_name, field_text in page_fields:
+        if field_name in value_choices:
+            value_extent_str_and_idx["Value"] = {
+                "Text": field_name.capitalize(),
+                "Index": value_choices.index(field_name),
+            }
+        elif field_name in extent_choices:
+            value_extent_str_and_idx["Extent"] = {
+                "Text": field_name.capitalize(),
+                "Index": extent_choices.index(field_name),
+            }
+    if not value_extent_str_and_idx:
+        for field_name, field_text in page_fields:
+            if "extent" in field_name:
+                justification_text: list = field_text.split(" ")
+                for i in range(36, len(justification_text), 8):
+                    n: int = i - 36
+                    sentence: str = " ".join(justification_text[n:i])
+                    val_ext_found: list[str] = []
+                    for v in value_choices:
+                        for e in extent_choices:
+                            if v in sentence and e in sentence:
+                                val_ext_found = [v,e]
+                                break
+                    if not val_ext_found:
+                        return {}
+                    else:
+                        for text in val_ext_found:
+                            sentence = sentence.replace(
+                                text, "--- " + text.upper() + " ---"
+                            )
+                        val_ext_msg = (
+f"""
+=== Value and Extent Detection Results ===
 
-def validate_award_amounts(NomineeDetails: NomineeDetails) -> None:
-    if NomineeDetails.money == 0 and NomineeDetails.hours == 0:
-        raise ValueError(f"{NomineeDetails}\nBoth nominee amount and hours are zero. At least one should have a non-zero value.")
+Detected Value and Extent:
+{val_ext_found}
 
-def get_individual_nominee_details(PDFData: PDFData) -> NomineeDetails:
-    
-    def get_individual_name(first_page_fields: dict) -> str:
-        name: str = ""
-        for field_name, field_text in first_page_fields.items():
-            if "employee name" in field_name:
-                name = TextFormat.name(field_text)
-                break
-        if not name:
-            raise ValueError("Nominee name not found.")
-        return name
-    
-    def get_individual_money(first_page_fields: dict) -> int:
-        money: int = 0
-        monetary_fields: list[str] = ["amount", "undefined", "the spot"]
-        for field_name, field_text in first_page_fields.items():
-            for monetary_field in monetary_fields:
-                if monetary_field in field_name:
-                    money = TextFormat.numerical(field_text)
-                    break
-        return money
-    
-    def get_individual_hours(first_page_fields: dict) -> int:
-        hours: int = 0
-        for field_name, field_text in first_page_fields.items():
-            if "hours" in field_name:
-                hours = TextFormat.numerical(field_text)
-                break
-        return hours
-    
-    individual_nominee_details: NomineeDetails = NomineeDetails(
-        name=get_individual_name(PDFData.first_page_fields),
-        money=get_individual_money(PDFData.first_page_fields),
-        hours=get_individual_hours(PDFData.first_page_fields),
-    )
-    validate_award_amounts(individual_nominee_details)
-    return individual_nominee_details
+Sentence:
+>>> {sentence} <<<
 
-def process_individual_award(file_path: str, serial_number: int) -> IndividualAward:
-    pdf_content: PDFData = get_pdf_data(file_path)
-    award_details: AwardDetails = process_award_details(PDFData)
-    individual_nominee_details: NomineeDetails = get_individual_nominee_details(PDFData)
-    individual_award = IndividualAward(
-        award_details=award_details,
-        individual_nominee_details=individual_nominee_details,
-        id="24-IND-" + str(serial_number),
-    )
-    return individual_award
+---
+1 = Accept
+0 = Deny
+"""
+)
+                        print(val_ext_msg)
+                        choice: str = input(">>> ").strip()
+                        if choice == "" or choice == "0":
+                            return {}
+                        elif choice == str(1):
+                            xvalue,xextent = val_ext_found[0],val_ext_found[1]
+                            value_extent_str_and_idx["Value"] = {
+                                "Text": xvalue.capitalize(),
+                                "Index": value_choices.index(xvalue),
+                            }
+                            value_extent_str_and_idx["Extent"] = {
+                                "Text": xextent.capitalize(),
+                                "Index": extent_choices.index(xextent),
+                            }
+    return value_extent_str_and_idx
 
-def enforce_award_limits(processed_indGrp_award) -> None:
+def validate_award_amounts(
+        nominees: Union[Dict,List[Dict]],
+        value_extent_str_and_idx: dict,
+        is_group: bool = False,
+        is_individual: bool = False
+) -> None:
     monetary_limits: list[list[int]] = [
         [500, 1000, 3000],      # moderate
         [1000, 3000, 6000],     # high
@@ -353,9 +277,8 @@ def enforce_award_limits(processed_indGrp_award) -> None:
         [18, 27, 36],   # high
         [27, 36, 40],   # exceptional
     ]  # limited | extended | general
-    
-    value_index: int = award.value.index
-    extent_index: int = award.extent.index
+    value_index: int = value_extent_str_and_idx["Value"]["Index"]
+    extent_index: int = value_extent_str_and_idx["Extent"]["Index"]
     max_monetary: int = monetary_limits[value_index][extent_index]
     max_hours: int = time_limits[value_index][extent_index]
 
@@ -369,7 +292,7 @@ def enforce_award_limits(processed_indGrp_award) -> None:
         total_monetary = sum(nominee["Monetary"] for nominee in nominees)
         total_hours = sum(nominee["Hours"] for nominee in nominees)
         name_len = max([len(nominee['Name'])for nominee in nominees]) + 4
-        money_len = max([len(nominee['Monetary'])for nominee in nominees]) + 4
+        money_len = max([len(str(nominee['Monetary']))for nominee in nominees]) + 4
         nominee_details = "\n".join(
                 f"- {nominee['Name'].ljust(name_len)}Monetary: ${str(nominee['Monetary']).ljust(money_len)}Hours: {nominee['Hours']}"
                 for nominee in nominees
@@ -382,7 +305,7 @@ NAP 332.2 - page 11, attached
     - The total amount of the award may not exceed the amount that would be authorized
       if the contribution had been made by one individual.
 """
-        ).strip()
+)
     elif is_individual and isinstance(nominees,dict):
         total_monetary = nominees["Monetary"]
         total_hours = nominees["Hours"]
@@ -399,29 +322,37 @@ NAP 332.2 - page 22, attached
         - In this scenario, either the monetary award or the time off hours would need to be adjusted
           to equal a combined 100%.
 """
-        ).strip()
+)
     monetary_percentage = total_monetary / max_monetary
     time_percentage = total_hours / max_hours
     total_percentage = monetary_percentage + time_percentage
+    total_len: int = max(
+        [
+            len(str(total_monetary))+4,
+            len(str(total_hours))+4
+        ]
+    )
     if total_percentage > 1:
+        valStr: str = value_extent_str_and_idx['Value']['Text']
+        extStr: str = value_extent_str_and_idx['Extent']['Text']
         nominee_key: str = "Nominee:" if is_individual else "Nominees:"
         error_message = (
 f"""
 Error: Award amounts exceed the maximum allowed based on the selected award value and extent.
 
 Award Details:
-- Value:   {value_extent_str_and_idx['Value']['Text']}
-- Extent:  {value_extent_str_and_idx['Extent']['Text']}
+- Value:   {valStr}
+- Extent:  {extStr}
 
-Limits:
+{valStr} x {extStr} Limits: (NAP 332.2, Pg. 21 - 23)
 - Monetary:  ${max_monetary}
 - Time-Off:  {max_hours} hours
 
 {nominee_key}
 {nominee_details}
 
-Total Monetary:   ${str(total_monetary).ljust(money_len)}{monetary_percentage:.2%} of limit.
-Time-Off Total:    {str(total_hours).ljust(money_len)}{time_percentage:.2%} of limit.
+Monetary Total:   ${str(total_monetary).ljust(total_len)}{monetary_percentage:.2%} of limit.
+Time-Off Total:    {str(total_hours).ljust(total_len)}{time_percentage:.2%} of limit.
 
 Percentage Sum:   {total_percentage:.2%}
 Max Allowed:      100%
@@ -434,8 +365,33 @@ Thank you."""
 )
         raise ValueError(error_message)
 
+
+def get_shared_ind_grp_data(pdf_fields: dict) -> dict:
+    first_page_fields: dict = pdf_fields["first_page"]
+    last_page_fields: dict = pdf_fields["last_page"]
+    shared_data: dict = {
+        "Funding Org": get_funding_org(first_page_fields),
+        "Nominator": get_nominator_name(first_page_fields),
+        "Justification": get_justification(last_page_fields),
+        "Type": (
+            get_type(first_page_fields, grp=True)
+            if pdf_fields["category"] == "GRP"
+            else get_type(first_page_fields, ind=True)
+        ),
+    }
+    if None in shared_data.values():
+        none_fields = [
+            str("- " + field)
+            for field in shared_data.keys()
+            if shared_data[field] is None
+        ]
+        none_fields_err = "\n".join(none_fields)
+        raise Exception(f"Error:\nMissing required fields:\n{none_fields_err}\n")
+    return shared_data
+
+
 def writeXlsRows(award_data: dict) -> None:
-    spreadsheet_rows_txt = r"C:\Users\joseph.strong\OneDrive - US Department of Energy\Python\process_award_data\spreadsheet_rows.txt"
+    spreadsheet_rows_txt = r"C:\spreadsheet"
     award_id = award_data["Award ID"]
     award_date = award_data["Date Received"]
     award_category = award_data["Category"]
@@ -458,6 +414,23 @@ def writeXlsRows(award_data: dict) -> None:
             xls_row = f"{award_id}\t{award_date}\t\t{award_nominee}\t{award_category}\t{award_type}\t{award_money}\t{award_time}\t{award_nominator}\t{award_org}\t\t{award_just}\n"
             with open(spreadsheet_rows_txt, "a") as f:
                 f.write(xls_row)
+
+
+def determine_date_received(pdf_fields: dict) -> str:
+    date: str = ""
+    today = datetime.now()
+    tomorrow = today + timedelta(days=1)
+    for k, v in pdf_fields["first_page"].items():
+        if k == "date received" and v.lower() != "today":
+            return v
+    if received_date_is_tomorrow:
+        date = tomorrow.strftime("%Y-%m-%d")
+
+    else:
+        date = today.strftime("%Y-%m-%d")
+    if not date:
+        raise ValueError("Unable to determine date received.")
+    return date
 
 def insertDateReceived(filePath: str, award_data: dict) -> None:
     with fitz.open(filePath) as doc:
@@ -518,18 +491,34 @@ def createNewFileName(award_data: dict) -> str:
     )
 
 
-def renameAwardFile(filePath: str, new_file_name: str) -> str:
-    new_path: str = ""
+def create_new_file_path(original_path: Path, new_file_name: str) -> Path:
+    return original_path.parent / f"{new_file_name}.pdf"
+
+def validate_file_name(file_name: str) -> None:
+    if not file_name.strip():
+        raise ValueError("New file name cannot be empty.")
+    if "/" in file_name or "\\" in file_name:
+        raise ValueError("New file name cannot contain path separators.")
+
+def renameAwardFile(file_path: str, new_file_name: str) -> Optional[Path]:
     try:
-        directory: str = os.path.dirname(filePath) + "\\"
-        old_file_name: str = os.path.basename(filePath)
-        new_path = directory + new_file_name + ".pdf"
-        os.rename(filePath, new_path)
+        validate_file_name(new_file_name)
+        
+        original_path = Path(file_path)
+        new_path = create_new_file_path(original_path, new_file_name)
+        
+        original_path.rename(new_path)
+        return new_path
+    
     except FileNotFoundError:
-        print(f"{filePath} not found.")
+        print(f"File not found: {file_path}")
+    except PermissionError:
+        print(f"Permission denied when renaming file: {file_path}")
+    except ValueError as ve:
+        print(f"Invalid file name: {ve}")
     except Exception as e:
         print(f"Error occurred while renaming file: {e}")
-    return new_path
+    return None
 
 
 def determine_grp_configuration(page_count: int) -> list[list]:
@@ -604,8 +593,11 @@ def get_grp_nominees_names_and_award_amounts(
         current_nominee: dict = {"Name": None, "Monetary": 0, "Hours": 0}
 
         for field_name, field_text in mid_page_fields.items():
-            if "employee name" in field_name and field_text not in nominees_detected:
-                nominees_detected.append(field_text)
+            if "left blank" in field_text.lower():
+                continue
+            field_text = xname(field_text)
+            if "employee name" in field_name and (field_name,field_text) not in nominees_detected:
+                nominees_detected.append((field_name,field_text))
             current_nominee["Name"] = (
                 xname(field_text)
                 if current_nominee["Name"] is None and field_name == nominee_name_field
@@ -679,25 +671,46 @@ def process_grp_award_data(pdf_fields: dict, grp_sn: int) -> dict:
     grp_award_data: dict = {
         "Award ID": "24-GRP-" + str(grp_sn).zfill(3),
     }
-    if str(pdf_fields["file_name"]).startswith("24-"):
-        grp_award_data["Award ID"] = pdf_fields["file_name"].split(" ")[0]
-    shared_ind_grp_data: dict = process_award_details(pdf_fields)
+    shared_ind_grp_data: dict = get_shared_ind_grp_data(pdf_fields)
     grp_award_data.update(shared_ind_grp_data)
     grp_award_data["Category"] = "GRP"
     group_configuration = determine_grp_configuration(pdf_fields["page_count"])
-    nominees = get_grp_nominees_names_and_award_amounts(
-        group_configuration, mid_pages_fields
-    )
-    value_and_extent: dict = get_award_value(last_page_fields)
+    nominees = get_grp_nominees_names_and_award_amounts(group_configuration, mid_pages_fields)
+    value_and_extent: dict = get_value_and_extent(last_page_fields)
     if value_and_extent:
-        enforce_award_limits(nominees, value_and_extent, is_group=True)
+        validate_award_amounts(nominees, value_and_extent, is_group=True)
         grp_award_data["Value"] = value_and_extent["Value"]["Text"]
         grp_award_data["Extent"] = value_and_extent["Extent"]["Text"]
     grp_award_data["Nominees"] = nominees
-    grp_award_data["Date Received"] = determine_received_date(pdf_fields)
+    grp_award_data["Date Received"] = determine_date_received(pdf_fields)
     return grp_award_data
 
 
+def get_ind_name_amounts(first_page_fields: dict) -> dict:
+    ind_name_amounts: dict = {
+        "Name": None,
+        "Monetary": 0,
+        "Hours": 0,
+    }
+    for field_name, field_text in first_page_fields.items():
+        if ind_name_amounts["Name"] is None and field_name == "employee name":
+            ind_name_amounts["Name"] = xname(field_text)
+
+        elif (
+            ind_name_amounts["Monetary"] == 0
+            and field_name in ["amount", "undefined"]
+            or "the spot" in field_name
+        ):
+            ind_name_amounts["Monetary"] = xnumerical(field_text)
+
+        elif ind_name_amounts["Hours"] == 0 and "hours" in field_name:
+            ind_name_amounts["Hours"] = xnumerical(field_text)
+    ind_name_amounts_str = "\t".join(f"{k}: {v}" for k, v in ind_name_amounts.items())
+    if ind_name_amounts["Monetary"] == 0 == ind_name_amounts["Hours"]:
+        raise Exception(f"No award amount found.\n{ind_name_amounts_str}\n")
+    elif ind_name_amounts["Name"] is None:
+        raise Exception("Unable to determine IND award nominee")
+    return ind_name_amounts
 
 
 def process_ind_award_data(pdf_fields: dict, ind_sn: int) -> dict:
@@ -706,25 +719,29 @@ def process_ind_award_data(pdf_fields: dict, ind_sn: int) -> dict:
     ind_award_data: dict = {
         "Award ID": "24-IND-" + str(ind_sn).zfill(3),
     }
-    if str(pdf_fields["file_name"]).startswith("24-"):
-        ind_award_data["Award ID"] = pdf_fields["file_name"].split(" ")[0]
-    shared_ind_grp_data: dict = process_award_details(pdf_fields)
+    # if str(pdf_fields["file_name"]).startswith("24-"):
+    #     ind_award_data["Award ID"] = pdf_fields["file_name"].split(" ")[0]
+    shared_ind_grp_data: dict = get_shared_ind_grp_data(pdf_fields)
     ind_award_data.update(shared_ind_grp_data)
     ind_award_data["Category"] = "IND"
     nominee_name_award_amounts: dict = get_ind_name_amounts(first_page_fields)
-    value_and_extent: dict = get_award_value(last_page_fields)
+    value_and_extent: dict = get_value_and_extent(last_page_fields)
     if value_and_extent:
-        enforce_award_limits(nominee_name_award_amounts, value_and_extent, is_individual=True)
+        validate_award_amounts(nominee_name_award_amounts, value_and_extent, is_individual=True)
         ind_award_data["Value"] = value_and_extent["Value"]["Text"]
         ind_award_data["Extent"] = value_and_extent["Extent"]["Text"]
     ind_award_data["Nominee"] = nominee_name_award_amounts["Name"]
     ind_award_data["Monetary"] = nominee_name_award_amounts["Monetary"]
     ind_award_data["Hours"] = nominee_name_award_amounts["Hours"]
-    ind_award_data["Date Received"] = determine_received_date(pdf_fields)
+    ind_award_data["Date Received"] = determine_date_received(pdf_fields)
+    if ind_award_data["Nominator"] == ind_award_data["Nominee"]:
+        award_error: str = "\n".join(f"{k}: {v}" for k,v in ind_award_data.items())
+        raise ValueError(f"Error: Nominator == Nominee\n\n{award_error}")
     return ind_award_data
 
-def getSerialNums(file: int) -> None:
-    with open(file, "r") as f:
+
+def getSerialNums() -> dict:
+    with open(AWARD_SER_NUMS, "r") as f:
         jsonSerNums = json.load(f)
         serialNums: dict[str,int] = {
             "IND": jsonSerNums["IND"],
@@ -732,8 +749,9 @@ def getSerialNums(file: int) -> None:
         }
         return serialNums
 
-def updateSerialNums(file: str, serialNums: dict) -> None:
-    with open(file, "w") as f:
+
+def updateSerialNums(serialNums: dict) -> None:
+    with open(AWARD_SER_NUMS, "w") as f:
         json.dump(serialNums, f, indent=4)
 
 
@@ -741,73 +759,73 @@ def move_file(filePath: str) -> None:
     shutil.move(filePath, FY24_FOLDER)
 
 
-def processFiles() -> None:
-    try:
-        serialNums: dict = getSerialNums()
-        indID: int = serialNums["IND"]
-        grpID: int = serialNums["GRP"]
-        notProcessed: list[str] = []
-        folderPath: str = PROCESSING_FOLDER if not TESTING else TEST_FOLDER
-        file_paths: Generator = Path(folderPath).rglob("*pdf")
-        for file_path in file_paths:
-            fileName: str = os.path.basename(file_path)
-            nameLen: int = len(fileName)
-            try:
-                pdfFields: dict = get_pdf_fields(file_path)
-                awardCategory: str = pdfFields["category"]
-                awardData: dict = {}
-                formattedData: str = ""
-                if awardCategory == "GRP":
-                    awardData = process_grp_award_data(pdfFields, grpID)
-                else:
-                    awardData = process_ind_award_data(pdfFields, indID)
-                if CREATE_XLS_ROWS:
-                    writeXlsRows(awardData)
-                if PRINT_AWARD_DATA:
-                    formattedData = format_and_save(fileName,awardData)
-                    print(formattedData)
-                if not TESTING:
-                    if INSERT_DATE:
-                        insertDateReceived(str(file_path), awardData)
-                    newFileName: str = createNewFileName(awardData)
-                    if RENAME_AND_MOVE:
-                        newFilePath: str = renameAwardFile(file_path, newFileName)
-                        move_file(newFilePath)
-                if awardCategory == "GRP":
-                    grpID += 1
-                else:
-                    indID += 1
-            except Exception as e:
-                hash_block: str = "#####\n"*5
-                error_message = (
+def processFiles(file_paths) -> None:
+    serialNums: dict = getSerialNums()
+    indID: int = serialNums["IND"]
+    grpID: int = serialNums["GRP"]
+    notProcessed: list[str] = []
+    for file_path in file_paths:
+        fileName: str = os.path.basename(file_path)
+        if fileName.startswith("#"):
+            continue
+        try:
+            pdfFields: dict = get_pdf_fields(file_path)
+            awardCategory: str = pdfFields["category"]
+            awardData: dict = {}
+            formattedData: str = ""
+            if awardCategory == "GRP":
+                awardData = process_grp_award_data(pdfFields, grpID)
+            else:
+                awardData = process_ind_award_data(pdfFields, indID)
+            if _write_xls_rows_:
+                writeXlsRows(awardData)
+            if _print_data_:
+                formattedData = format_and_save(fileName,awardData)
+                print(formattedData)
+            if not _testing_:
+                if _insert_date_:
+                    insertDateReceived(str(file_path), awardData)
+                newFileName: str = createNewFileName(awardData)
+                if _rename_move_file_:
+                    newFilePath = renameAwardFile(file_path, newFileName)
+                    move_file(newFilePath)
+            if awardCategory == "GRP" and str(grpID).zfill(3) in newFileName.split()[0]:
+                grpID += 1
+            elif awardCategory == "IND" and str(indID).zfill(3) in newFileName.split()[0]:
+                indID += 1
+        except Exception as e:
+            hash_block: str = "#####\n"*5
+            error_message = (
 f"""
 {hash_block}
 {fileName}
 {e}
 {'.' * 50}
 """
-).strip()
-                print(error_message)
-                with open(r'process_award_data\awards_output.txt','a') as f:
-                    f.write(error_message+"\n")
-                notProcessed.append(fileName)
-        if UPDATE_AWARD_SER_NUMS and not TESTING:
-            updateSerialNums({"IND": indID, "GRP": grpID})
-        if len(notProcessed) > 0:
-            print(f"Not Processed ({len(notProcessed)}):")
-            print("\n".join(notProcessed))
-    except Exception as e:
-        print(f"Error: {e}")
+)
+            print(error_message)
+            with open(r'process_award_data\awards_output.txt','a') as f:
+                f.write(error_message+"\n")
+            notProcessed.append(fileName)
+    if _update_serial_numbers_ and not _testing_:
+        updateSerialNums({"IND": indID, "GRP": grpID})
+    if len(notProcessed) > 0:
+        print(f"Not Processed ({len(notProcessed)}):")
+        print("\n".join(notProcessed))
 
 
 if __name__ == "__main__":
-
     print()
     print(" START ".center(100, "."))
     print()
     try:
-        processFiles()
+        folderPath: str = PROCESSING_FOLDER if not _testing_ else TEST_FOLDER
+        file_paths: Generator = Path(folderPath).rglob("*pdf")
+        processFiles(file_paths=file_paths)
     except Exception as e:
         print(e)
     print()
     print(" END ".center(100, "."))
+    if received_date_is_tomorrow:
+        print('RECEIVED DATE == TOMORROW\n'*5)
+
