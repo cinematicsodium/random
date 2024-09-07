@@ -1,0 +1,50 @@
+* Analyze the provided Excel Tracker Fields for clarity, structure.
+    ExcelFields: {
+"""
+reasonable ammodation details:
+- case number
+- type
+- status
+- RA specialist
+
+employee details:
+- name
+- organization
+- supervisor
+
+form - request for reasonable accommodation:
+- date received
+- specialist's initial review date
+- compliance officer review date
+- compliance officer response date
+- date of when a meeting request is sent to employee
+- specialist & employee meeting date
+- date of when a meeting request is sent to supervisor
+- specialist & supervisor meeting date
+
+form - medical inquiry:
+- due date
+- status
+
+form - description of essential functions:
+- date sent to supervisor
+- due date
+
+undefined:
+- create case assessment
+- material to be relied upon
+- determination of reasonable accommodation request
+- denial of reasonable accommodation
+
+counsel:
+- contact date
+- final determination date
+
+"""
+}
+* Identify potential improvements, with a focus on:
+   - Refactoring the ExcelFields into separate categories where needed.
+   - Renaming ExcelFields for improved readability and adherence to naming conventions.
+   - Optimizing the overall Excel Tracker architecture.
+* Refine and rewrite the ExcelFields to incorporate the identified improvements.
+* Present the final, optimized version of the Excel Tracker Fields formatted as code.
