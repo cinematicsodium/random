@@ -1,5 +1,5 @@
-* Analyze the provided Excel Tracker Fields for clarity, structure.
-    ExcelFields: {
+* Analyze the provided Form Fields for clarity, structure.
+    Fields: {
 """
 reasonable ammodation details:
 - case number
@@ -12,7 +12,7 @@ employee details:
 - organization
 - supervisor
 
-form - request for reasonable accommodation:
+request for reasonable accommodation:
 - date received
 - specialist's initial review date
 - compliance officer review date
@@ -22,11 +22,11 @@ form - request for reasonable accommodation:
 - date of when a meeting request is sent to supervisor
 - specialist & supervisor meeting date
 
-form - medical inquiry:
+medical inquiry:
 - due date
 - status
 
-form - description of essential functions:
+description of essential functions:
 - date sent to supervisor
 - due date
 
