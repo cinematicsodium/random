@@ -1,0 +1,11 @@
+modify table style:
+
+    whole table:
+        border:
+            color:
+                #A5A5A5
+
+    first row stripe:
+        fill:
+            pattern color:
+                #EDEDED
