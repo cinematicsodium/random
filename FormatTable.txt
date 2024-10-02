@@ -1,11 +1,25 @@
 modify table style:
 
+
     whole table:
+        font:
+            color:
+                #009
         border:
             color:
-                #A5A5A5
+                #BFBFBF
+
 
     first row stripe:
         fill:
-            pattern color:
+            background color:
                 #EDEDED
+
+
+    header row:
+        font:
+            color:
+                automatic
+        fill:
+            background color:
+                light gray (Col 0, Row 1)
