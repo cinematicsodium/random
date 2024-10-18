@@ -1,24 +1,98 @@
-1. Analyze the provided code for clarity, structure, and functionality.
-    code: {
-"""
-    
-"""
-}
-2. Identify potential improvements, with a focus on:
-   - Refactoring the code into separate functions where needed.
-   - Renaming variables for improved readability and adherence to naming conventions.
-   - Optimizing data structures, types, and the overall code architecture.
-   - Ensuring maintainability and scalability through best coding practices.
-3. Refine and rewrite the code to incorporate the identified improvements.
-4. Present the final, optimized version of the code.
-
+....................................................................................................
+EXCEL
 ....................................................................................................
 
-1. Analyze the provided prompt for clarity, structure, and functionality.
-    prompt: {
+Analyze the following Excel formula for clarity, specificity, and effectiveness.
+
+Formula to analyze:
+"""
+[INSERT FORMULA]
 """
 
-"""}
-2. Identify potential improvements.
-3. Refine and rewrite the prompt to incorporate the identified improvements.
-4. Present the final, optimized version of the prompt.
+Highlight potential ambiguities or misinterpretations.
+Identify potential improvements or additions to make it more concise and readable while retaining core objectives.
+Refine and rewrite the formula to incorporate identified improvements.
+Provide a final version of the formula formatted as plain text code.
+
+Please structure your response with clear subheadings for each section.
+
+....................................................................................................
+CODE
+....................................................................................................
+
+Analyze the provided code according to the following criteria:
+
+- Clarity: Assess the readability and comprehensibility of the code.
+- Structure: Examine the organization and logic of the code.
+- Functionality: Verify if the code fulfills its intended purpose.
+- Efficiency: Identify opportunities for performance optimization.
+- Best Practices: Evaluate adherence to standard coding conventions.
+
+Code to analyze:
+"""
+[INSERT CODE]
+"""
+
+Instructions:
+
+- Present your analysis for each criterion using bullet points or short paragraphs.
+- Identify at least three potential improvements, briefly explaining the reasoning behind each suggestion.
+- Rewrite the code incorporating the proposed improvements.
+- Explain the changes made and how they enhance the original code.
+
+Please structure your response with clear subheadings for each section.
+
+....................................................................................................
+PROMPT
+....................................................................................................
+
+Analyze the following prompt for clarity, specificity, and effectiveness.
+
+Prompt to analyze:
+"""
+[INSERT PROMPT]
+"""
+
+Highlight potential ambiguities or misinterpretations.
+Identify improvements or additions to make it more concise while retaining core objectives.
+Refine and rewrite the prompt to incorporate identified improvements.
+Provide a final version of the prompt formatted as plain text code.
+
+....................................................................................................
+REPHRASING
+....................................................................................................
+
+You are an expert in language and communication. Your task is to rewrite the given text while preserving its original meaning. Follow these guidelines:
+- Carefully analyze the input text to understand its core message and key points.
+- Rewrite the text using different words and sentence structures while maintaining the original meaning.
+- Adapt your paraphrasing to the specified parameters:
+    - Tone: 
+    - Length: 
+    - Complexity: 
+Ensure that all factual information and main ideas from the original text are accurately represented in the paraphrased version.
+Maintain the logical flow and coherence of the original text in your paraphrased version.
+
+text to rewrite:
+"""
+[INSERT TEXT]
+"""
+
+Tone
+    - Formal
+    - Casual
+    - Technical
+    - Conversational
+Length
+    - Similar
+    - Shorter
+    - Longer
+    - Concise
+Complexity
+    - Simplified
+    - Standard
+    - Advanced
+    - Academic
+
+....................................................................................................
+https://beta.xkpasswd.net/?c=ZW5nbGlzaCw0LDQsOCxMT1dFUixGSVhFRCxMUSxJVUFrSlY0bUtpMWZLejA2Zkg0X0x5NDcsMCwyLE5PTkUsOCxSQU5ET00sLElVQWtKVjRtS2kxZkt6MDZmSDRfTHk0NywwLDA
+....................................................................................................
