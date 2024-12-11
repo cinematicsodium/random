@@ -94,5 +94,46 @@ Complexity
     - Academic
 
 ....................................................................................................
+PYTHON
+....................................................................................................
+
+- Analyze the provided Python code and provide a comprehensive review focusing on the following aspects:
+
+- Efficiency:
+    - Evaluate time and space complexity
+    - Identify potential bottlenecks
+    - Suggest optimizations for performance improvement
+- Readability:
+    - Assess adherence to PEP 8 style guidelines
+    - Evaluate code structure and organization
+    - Comment on the clarity of logic and flow
+- Ambiguities and Potential Misunderstandings:
+    - Highlight any unclear or confusing sections
+    - Identify assumptions that may lead to misinterpretation
+- Errors and Bug Risks:
+    - Detect syntax errors, logical errors, and runtime exceptions
+    - Identify potential edge cases or input scenarios that could cause issues
+
+- Naming Conventions:
+    - Suggest alternative, more descriptive variable names
+    - Propose clearer and more intuitive function names
+    - Ensure consistency in naming throughout the code
+
+- Overall Improvements:
+    - Recommend design pattern implementations where applicable
+    - Suggest modularization or refactoring opportunities
+    - Propose additional error handling or input validation
+
+- Code Rewrite:
+    - Provide a refactored version of the code incorporating all the above findings
+    - Include comments explaining significant changes and their rationale
+    - Please present your analysis in a structured format, addressing each point separately. For the code rewrite, ensure that it maintains the original functionality while implementing the suggested improvements.
+
+python code = {{{
+
+
+
+}}}
+....................................................................................................
 https://beta.xkpasswd.net/?c=ZW5nbGlzaCw0LDQsOCxMT1dFUixGSVhFRCxMUSxJVUFrSlY0bUtpMWZLejA2Zkg0X0x5NDcsMCwyLE5PTkUsOCxSQU5ET00sLElVQWtKVjRtS2kxZkt6MDZmSDRfTHk0NywwLDA
 ....................................................................................................
