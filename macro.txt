@@ -1,0 +1,72 @@
+The issue in your macro arises from the way the AutoFilter is trying to filter both a specific value (“p”) and blanks (”=”). However, when filtering for blanks alongside another value using Array in VBA, the filter can fail to work as intended.
+
+Solution
+
+You need to address two points:
+	1.	Filter blanks and “p” values properly.
+	2.	Ensure the Criteria1 argument is correctly formatted to interpret blanks.
+
+Here is the corrected and more reliable version:
+
+Key Fix
+
+Use two consecutive filter calls to achieve the intended outcome. First, filter for blanks (Criteria1:="="), and then add “p” explicitly using an OR filter with Criteria2.
+
+Updated Code
+
+Sub ViewBlanks()
+    Const FILTER_COLUMN As Integer = 28
+    
+    On Error GoTo ErrorHandler
+    
+    Dim ws As Worksheet
+    Dim lo As ListObject
+    
+    Set ws = ThisWorkbook.Worksheets("Main")
+    Set lo = ws.ListObjects("txnReport")
+    
+    ' Filter to show "p" and blanks
+    lo.Range.AutoFilter Field:=FILTER_COLUMN, _
+                        Criteria1:="=", _
+                        Operator:=xlOr, _
+                        Criteria2:="p"
+    
+    ' Sort by Name
+    SortListObject lo, "Name"
+    
+    ' Sort by Organization
+    SortListObject lo, "Org."
+    
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "An error occurred: " & Err.Description
+End Sub
+
+Sub SortListObject(lo As ListObject, columnName As String)
+    With lo.Sort
+        .SortFields.Clear
+        .SortFields.Add2 Key:=lo.ListColumns(columnName).Range, _
+                         SortOn:=xlSortOnValues, _
+                         Order:=xlAscending, _
+                         DataOption:=xlSortTextAsNumbers
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+End Sub
+
+Explanation of Changes
+	1.	Filter for Both Blanks and “p”:
+	•	Criteria1:="=" filters blank rows.
+	•	Operator:=xlOr, Criteria2:="p" adds “p” values into the same filter.
+	2.	Avoid Using Arrays for Mixed Filters:
+	•	Arrays are not necessary for filtering blanks and a specific value in AutoFilter.
+
+Outcome
+
+This will correctly filter rows where column 28 has blanks ("") or “p”, and will leave the rest hidden.
+
+Let me know if further clarification is needed!
