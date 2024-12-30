@@ -1,0 +1,1 @@
+="ARCHIVE" & IFERROR(" (" & TEXT(MIN(archive[DATE]),"MMM. YYYY") & " – " & TEXT(MAX(archive[DATE]),"MMM. YYYY") & ")","")
