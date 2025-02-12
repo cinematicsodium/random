@@ -1,0 +1,474 @@
+{
+    "pams": {
+        "__PAMS_main__.py": {
+            "functions": [
+                "get_code_data",
+                "get_defined_custom_items",
+                "get_defined_functions",
+                "get_defined_variables",
+                "main",
+                "process_action",
+                "retrieve_code"
+            ],
+            "variables": [
+                "MENU_OPTIONS",
+                "OPERATIONS",
+                "action",
+                "code",
+                "custom_item_names",
+                "directory",
+                "error_message",
+                "formatted_notice",
+                "notice_template",
+                "org_string",
+                "path_name",
+                "tree",
+                "variable_names"
+            ],
+            "items": []
+        },
+        "constants.py": {
+            "functions": [
+                "action_dict",
+                "get_current_fiscal_year"
+            ],
+            "variables": [
+                "TODAY",
+                "current_date",
+                "current_year",
+                "fiscal_year",
+                "fiscal_year_start_month"
+            ],
+            "items": [
+                "Consultants",
+                "Liaisons"
+            ]
+        },
+        "modules.py": {
+            "functions": [],
+            "variables": [],
+            "items": [
+                "Action"
+            ]
+        },
+        "notices.py": {
+            "functions": [
+                "create_notice"
+            ],
+            "variables": [
+                "PAST_DUE",
+                "base_components"
+            ],
+            "items": [
+                "Notice"
+            ]
+        },
+        "utils.py": {
+            "functions": [
+                "_format_last_name",
+                "_format_name_parts",
+                "_get_user_input",
+                "_parse_name_parts",
+                "_update_yaml_file",
+                "code_to_org",
+                "compare_dates",
+                "convert_to_date_str",
+                "convert_to_datetime",
+                "determine_thirty_day_deadline",
+                "find_org_by_code",
+                "find_org_by_symbol",
+                "format_direct_reports",
+                "format_name",
+                "generate_direct_report_section",
+                "generate_notice_template",
+                "get_action_details",
+                "get_yaml_data",
+                "manual_entry",
+                "match_HRC_HRL",
+                "match_na_format",
+                "match_org",
+                "normalized",
+                "normalized_lines",
+                "prep_yaml_data",
+                "process_notice_template",
+                "reset_action_files",
+                "reset_notice_file",
+                "reset_yaml_file",
+                "save_notice_to_file",
+                "save_to_yaml_archive",
+                "undo_most_recent",
+                "validate_action_items",
+                "validate_detail_duration"
+            ],
+            "variables": [
+                "action",
+                "action_dict",
+                "actual_duration",
+                "chars",
+                "cleaned_lines",
+                "code_match",
+                "current_year",
+                "data",
+                "date_formats",
+                "date_string",
+                "deadline",
+                "employee_data",
+                "error_message",
+                "fields",
+                "final_format",
+                "formatted_emp_list",
+                "formatted_emp_str",
+                "formatted_names",
+                "hyphen_idx",
+                "input_data",
+                "most_recent",
+                "na_org",
+                "na_org_match",
+                "name_parts",
+                "normalized_symbol",
+                "notice",
+                "org_code",
+                "org_codes",
+                "org_matches",
+                "parsed_date",
+                "plan_match",
+                "raw_lines",
+                "replacements",
+                "required_duration",
+                "tab",
+                "uppercase_count",
+                "user_input",
+                "yaml_data"
+            ],
+            "items": [
+                "NameFormatting"
+            ]
+        }
+    },
+    "process_awards": {
+        "alerts.py": {
+            "functions": [
+                "gen_grp_limit_alert",
+                "gen_ind_limit_alert"
+            ],
+            "variables": [
+                "FOOTER",
+                "HEADER",
+                "POLICY",
+                "employee_details",
+                "hours_ratio",
+                "hours_str",
+                "hours_sum",
+                "max_monetary_len",
+                "max_name_len",
+                "monetary_ratio",
+                "monetary_str",
+                "monetary_sum",
+                "ratio_str",
+                "sum_ratio"
+            ],
+            "items": []
+        },
+        "constants.py": {
+            "functions": [
+                "combined"
+            ],
+            "variables": [
+                "COMMON_FIELDS",
+                "EXTENT_IDX_MAP",
+                "FY2024",
+                "FY2025",
+                "GRP_MAX_14_FIELDS",
+                "GRP_MAX_21_FIELDS",
+                "HOURS_LIMITS",
+                "IND_FIELDS",
+                "MAX_VALUES",
+                "MONETARY_LIMITS",
+                "OTS_FIELDS",
+                "PAGE_COUNTS",
+                "PAY_PLANS",
+                "RATING_SCALE",
+                "SAS_FIELDS",
+                "TESTING_FOLDER",
+                "VALUE_IDX_MAP",
+                "employees"
+            ],
+            "items": [
+                "CommonFields",
+                "GrpMax14Fields",
+                "GrpMax21Fields",
+                "IndFields",
+                "MaxValuesConfig",
+                "PageCountConfig",
+                "RatingScale",
+                "ValueFields"
+            ]
+        },
+        "fieldFuncs.py": {
+            "functions": [
+                "determine_award_type",
+                "determine_date_received",
+                "determine_main_funding_org",
+                "get_date_received",
+                "get_extent",
+                "get_justification",
+                "get_nominator_name",
+                "get_value",
+                "match_main_org"
+            ],
+            "variables": [
+                "current_date",
+                "date_formats",
+                "div",
+                "div_x",
+                "extent_fields",
+                "justification",
+                "justification_text",
+                "main_div",
+                "nominator",
+                "org_counter",
+                "org_field",
+                "org_match",
+                "ots_count",
+                "ots_fields",
+                "parsed_date",
+                "sas_count",
+                "sas_fields",
+                "value_fields"
+            ],
+            "items": []
+        },
+        "fileFuncs.py": {
+            "functions": [
+                "_load_serial_numbers",
+                "archive_file",
+                "archive_processed_file",
+                "determine_award_category",
+                "export_as_TSV",
+                "export_as_txt",
+                "export_award_details",
+                "extract_pdf_info",
+                "format_org_name",
+                "generate_award_metadata",
+                "generate_file_name",
+                "generate_grp_award_metadata",
+                "generate_ind_award_metadata",
+                "is_valid_field",
+                "load_serial_numbers",
+                "move_to_rejections",
+                "save_serial_numbers",
+                "update_pdf"
+            ],
+            "variables": [
+                "LOGGER",
+                "b2",
+                "b3",
+                "counter",
+                "current_metadata",
+                "data",
+                "date_fields",
+                "date_widget",
+                "employee_count",
+                "fields",
+                "formatted_org",
+                "metadata",
+                "metadata_values",
+                "new_file_name",
+                "new_metadata",
+                "new_path",
+                "path",
+                "pdf_info",
+                "serial_numbers",
+                "sheet",
+                "total_hours",
+                "total_monetary",
+                "workbook"
+            ],
+            "items": []
+        },
+        "formatting.py": {
+            "functions": [
+                "format_name",
+                "generate_name_parts_list",
+                "justification",
+                "name",
+                "numerical"
+            ],
+            "variables": [
+                "TITLES",
+                "digits",
+                "justif_str"
+            ],
+            "items": [
+                "Formatting"
+            ]
+        },
+        "grpConfig.py": {
+            "functions": [],
+            "variables": [],
+            "items": []
+        },
+        "grpFuncs.py": {
+            "functions": [
+                "get_grp_award_details",
+                "get_grp_emp_hours",
+                "get_grp_emp_monetary",
+                "get_grp_emp_name",
+                "get_grp_emp_org",
+                "get_grp_emp_pay_plan",
+                "get_grp_emp_supervisor",
+                "get_grp_employees",
+                "get_team_name",
+                "is_valid_employee"
+            ],
+            "variables": [
+                "formatted_employee_list",
+                "grp_award_details"
+            ],
+            "items": []
+        },
+        "indFuncs.py": {
+            "functions": [
+                "get_ind_award_details",
+                "get_ind_employee",
+                "get_ind_money",
+                "get_ind_name",
+                "get_ind_org",
+                "get_ind_pay_plan",
+                "get_ind_supervisor",
+                "get_ind_time"
+            ],
+            "variables": [
+                "ind_award_details",
+                "ind_employee",
+                "ots_money",
+                "ots_time",
+                "pay_plan_val",
+                "sas_money",
+                "sas_time"
+            ],
+            "items": []
+        },
+        "logger.log": {},
+        "logger.py": {
+            "functions": [
+                "__init__",
+                "_log",
+                "error",
+                "info",
+                "warning"
+            ],
+            "variables": [
+                "level",
+                "now"
+            ],
+            "items": [
+                "SimpleLogger"
+            ]
+        },
+        "main.py": {
+            "functions": [
+                "finalize_processing",
+                "get_award_details",
+                "get_user_selection",
+                "handle_processing_error",
+                "initialize_processing",
+                "main",
+                "process_file",
+                "process_files",
+                "select_processing_mode",
+                "select_validation_mode",
+                "update_serial_numbers"
+            ],
+            "variables": [
+                "award_details",
+                "award_files_inbox",
+                "error_message",
+                "file_count",
+                "formatted_list",
+                "incoming_submission_files",
+                "is_serial_numbers_updated",
+                "logger",
+                "max_attempts",
+                "options",
+                "pdf_info",
+                "prompt",
+                "rejected_count",
+                "rejected_files",
+                "selection",
+                "serial_numbers",
+                "testing",
+                "validate_amt"
+            ],
+            "items": []
+        },
+        "modules.py": {
+            "functions": [
+                "__str__",
+                "base_str_fields"
+            ],
+            "variables": [
+                "formatted_employee_list",
+                "max_monetary_len",
+                "max_name_len",
+                "tab"
+            ],
+            "items": [
+                "AwardDetails",
+                "EmpInfo",
+                "FYInfo",
+                "GrpAwd",
+                "IndAwd",
+                "JustifInfo",
+                "PDFInfo",
+                "SerialNumbers"
+            ]
+        },
+        "orgConfig.py": {
+            "functions": [],
+            "variables": [],
+            "items": []
+        },
+        "requirements.txt": {},
+        "utils.py": {
+            "functions": [
+                "generate_id",
+                "get_max_limits",
+                "is_compensation_valid",
+                "play_alert"
+            ],
+            "variables": [
+                "category",
+                "extent_idx",
+                "match",
+                "max_hours",
+                "max_monetary",
+                "pattern",
+                "ratio",
+                "value_idx"
+            ],
+            "items": []
+        },
+        "validation.py": {
+            "functions": [
+                "validate_grp_compensation",
+                "validate_grp_fields",
+                "validate_ind_compensation",
+                "validate_ind_fields",
+                "validate_value_and_extent"
+            ],
+            "variables": [
+                "employee",
+                "extent",
+                "hours_sum",
+                "invalid_grp_msg",
+                "invalid_ind_msg",
+                "linebreak",
+                "monetary_sum",
+                "required_fields_missing",
+                "value"
+            ],
+            "items": []
+        }
+    }
+}
