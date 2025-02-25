@@ -3,20 +3,23 @@ import pyautogui
 from time import sleep
 
 
-def print_current_time(text=None):
+def timeprint(text=None):
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     message = current_time if text is None else f"{current_time} - {text}"
     print(message)
 
 
 def start_timer():
-    for _ in range(4):
-        sleep(60)
-        print_current_time()
-    sleep(60)
+    num_minutes = 5
+    seconds_per_minute = 60
+    for n in range(num_minutes):
+        sleep(seconds_per_minute)
+        if n == num_minutes - 1:
+            return
+        timeprint()
 
 
-def typewriter():
+def keypress():
     print_current_time("starting timer...")
     while True:
         start_timer()
@@ -25,6 +28,6 @@ def typewriter():
 
 
 try:
-    typewriter()
+    keypress()
 except Exception as e:
     print(f"error: {e}")
