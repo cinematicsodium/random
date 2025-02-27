@@ -1,0 +1,49 @@
+from datetime import datetime
+from pathlib import Path
+import os
+
+DOWNLOADS_DIRECTORY: str
+PMS_DEST_DIRECTORY: str
+FILE_NAME_PREFIX: str
+
+
+def get_file_creation_date(file_path: str) -> str:
+    timestamp = os.path.getctime(file_path)
+    date_created = datetime.fromtimestamp(timestamp)
+    return str(date_created.date())
+
+
+def transfer_to_pm_dir(file_path: str):
+    date_created = get_file_creation_date(file_path)
+    new_name = f"{FILE_NAME_PREFIX} _ {date_created}{Path(file_path).suffix}"
+    new_path: str = os.path.join(PMS_DEST_DIRECTORY, new_name)
+    os.rename(file_path, new_path)
+    print(f"renamed file: {new_name}")
+
+
+def process_appraisal_files() -> None:
+    print("\nstart...\n")
+    try:
+        if not os.path.isdir(DOWNLOADS_DIRECTORY):
+            raise ValueError(f"invalid directory: {DOWNLOADS_DIRECTORY}")
+
+        appraisal_files: list[str] = [
+            file
+            for file in Path(DOWNLOADS_DIRECTORY).iterdir()
+            if "$keyword" in Path(file).name.lower()
+        ]
+        if not appraisal_files:
+            raise ValueError("No $keyword appraisal files found.")
+
+        for file_path in appraisal_files:
+            try:
+                transfer_to_pm_dir(file_path)
+            except Exception as e:
+                print(e)
+    except Exception as e:
+        print(e)
+    print("\nfinished...\n")
+
+
+if __name__ == "__main__":
+    process_appraisal_files()
