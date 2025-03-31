@@ -1,10 +1,11 @@
 import shutil
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from dataclasses import dataclass
-from rich.console import Console
-from typing import Optional
 from time import sleep
+from typing import Optional
+
+from rich.console import Console
 
 
 @dataclass
