@@ -1,137 +1,155 @@
 import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import NamedTuple
+from dataclasses import dataclass
+from rich.console import Console
+from typing import Optional
+from time import sleep
 
 
-class TransferConfig(NamedTuple):
-    file_path: str
-    target_directory: str
+@dataclass
+class FileTransfer:
+    file_path: Path
+    target_directory: Path
+    category: str = ""
 
-
-def get_time_diff_string(last_modified: datetime) -> int:
-    min_per_hour: int = 60
-    sec_per_min: int = 60
-    current_date = datetime.now()
-    time_difference = current_date - last_modified
-    hours = time_difference.total_seconds() // sec_per_min // min_per_hour
-    if hours <= 72:
-        value = hours
-        time_unit = "hours"
-    else:
-        value = hours // 24
-        time_unit = "days"
-    value = str(int(value)).zfill(2)
-    return f"{value} {time_unit} ago"
-
-
-def get_time_last_modified(file_path: Path) -> datetime:
-    last_modified_timestamp:float = os.path.getmtime(file_path)
-    last_modified_datetime: datetime = datetime.fromtimestamp(last_modified_timestamp)
-    return last_modified_datetime.replace(second=0, microsecond=0)
-
-
-def is_update_within_last_day(time_last_modified: datetime) -> bool:
-    one_day_ago: datetime = datetime.now() - timedelta(hours=24)
-    return one_day_ago <= time_last_modified
-
-
-def initiate_file_transfer(file_path: Path, target_directory: Path) -> None:
-    if not (file_path.exists() and file_path.is_file()):
-        raise ValueError(f"file not found or not a file: {file_path.name}")
-    if not (target_directory.exists() and target_directory.is_dir()):
-        raise ValueError(
-            f"directory not found or not a directory: {target_directory.name}"
+    def __str__(self) -> str:
+        self.category = self.category if self.category else None
+        return (
+            f"\n\n"
+            f"file:             {self.file_path.name}\n"
+            f"target_directory: {self.target_directory}\n"
+            f"category:         {self.category}"
         )
 
-    try:
-        if not _testing:
-            target_path = target_directory / file_path.name
-            shutil.copy2(file_path, target_path)
-
-    except Exception as e:
-        print(f"Error: {file_path.name} - {e}")
-
-
-def get_local_archived_award_files() -> list[TransferConfig]:
-    network_archive_dir: Path
-    local_archive_dir: Path
-    awards_to_transfer: list[TransferConfig] = [
-        TransferConfig(file_path=file_path, target_directory=network_archive_dir)
-        for file_path in local_archive_dir.iterdir()
-        if file_path.is_file()
-    ]
-    return awards_to_transfer
-
-
-def remove_local_archived_award_files(
-    transferred_award_files: list[TransferConfig],
-) -> None:
-    if _testing or not transferred_award_files:
-        return
-    for award in transferred_award_files:
-        try:
-            award.file_path.unlink()
-            print(f"Successfully deleted {award.file_path.name}")
-        except Exception as e:
-            print(f"{award.file_path.name} - {e}")
-
-
-def get_testing_mode_selection():
-    available_modes = (True, False)
-    print("Select the testing mode.")
-
-    for _ in range(3):
-        try:
-            [print(f"{idx}: {value}") for idx, value in enumerate(available_modes)]
-            user_selection = input(f">>> ").strip()
-            return available_modes[int(user_selection)]
-        except Exception:
-            print("Invalid input. Please enter a number.")
-
-    print("Unable to proceed with file transfers.")
-    exit()
-
-
-def main():
-    print()
-    try:
-        txn_report = TransferConfig()
-        sas_awards = TransferConfig()
-        
-        pending_transfers: list[TransferConfig] = [txn_report, sas_awards]
-        awards_to_transfer: list[TransferConfig] = get_local_archived_award_files()
-        if awards_to_transfer:
-            pending_transfers.extend(awards_to_transfer)
-        
-        for pending in pending_transfers:
-            time_last_modified: datetime = get_time_last_modified(pending.file_path)
-            time_difference = get_time_diff_string(time_last_modified)
-            
-            if not is_update_within_last_day(time_last_modified):
-                not_required_msg = "\n" + (
-                    ">>> Transfer not required.\n"
-                    f"    file: {pending.file_path.name}\n"
-                    f"    last modified: {str(time_last_modified)[:-3]} "
-                    f"({time_difference})"
-                )
-                print(not_required_msg)
-                continue
-
-            initiate_file_transfer(pending.file_path,pending.target_directory)
-            transfer_message = "\n" + (
-                ">>> Transfer complete.\n"
-                f"    file: {pending.file_path.name}\n"
-                f"    last modified: {str(time_last_modified)[:-3]} "
-                f"({time_difference})"
+    def validate_paths(self) -> None:
+        """Checks if the target directory and file path are valid."""
+        if not (self.target_directory.exists() and self.target_directory.is_dir()):
+            raise ValueError(
+                f"Directory not found or not a directory: {self.target_directory.name}"
             )
-            print(transfer_message)
-        remove_local_archived_award_files(awards_to_transfer)
+        elif not (self.file_path.exists() and self.file_path.is_file()):
+            raise ValueError(f"File not found or not a file: {self.file_path}")
 
-    except Exception as e:
-        print(f"### Error: {e}")
+    @staticmethod
+    def time_diff_str(last_modified: datetime) -> str:
+        """Returns a string representing the time difference between the current time and the last modified time."""
+        current_date = datetime.now()
+        time_difference = current_date - last_modified
+        hours = time_difference.total_seconds() // 3600
+
+        if hours <= 72:
+            return f"{int(hours)} hours ago"
+        else:
+            days = hours // 24
+            return f"{int(days)} days ago"
+
+    def get_last_modified(self) -> datetime:
+        """Returns the last modified date and time of the file."""
+        last_modified_timestamp: float = self.file_path.stat().st_mtime
+        last_modified: datetime = datetime.fromtimestamp(
+            last_modified_timestamp
+        ).replace(second=0, microsecond=0)
+        timedelta_str = self.time_diff_str(last_modified)
+        print(f"- Time last modified: {last_modified} ({timedelta_str})")
+        return last_modified
+
+    def is_recent(self) -> bool:
+        """Checks if the file was modified within the last 24 hours."""
+        _24_hours_ago: datetime = datetime.now() - timedelta(hours=24)
+
+        if _24_hours_ago <= self.get_last_modified():
+            print("- Transfer not required.")
+            return False
+        return True
+
+    def copy_file(self) -> None:
+        """Copies the file to the target directory."""
+        target_path = self.target_directory / self.file_path.name
+        # shutil.copy2(self.file_path, target_path)
+        print("- File transfer complete.")
+
+    def remove_file(self) -> None:
+        """Deletes the file."""
+        # self.file_path.unlink()
+        print(f"- File successfully deleted.")
+
+    def process_file(self) -> None:
+        """Processes the file by validating, transferring, and deleting (if required)."""
+        print(self)
+        sleep(1.5)
+        try:
+            self.validate_paths()
+            if self.category == "award":
+                self.copy_file()
+                self.remove_file()
+            elif not self.is_recent():
+                self.copy_file()
+
+        except Exception as e:
+            print(f"- ERROR: {e}")
+        print()
+
+
+def get_award_files() -> Optional[list[FileTransfer]]:
+    """Get local award files for transfer."""
+
+    network_dir: Path
+    local_dir: Path
+    award_files: list[FileTransfer] = [
+        FileTransfer(
+            file_path=file_path, target_directory=network_dir, category="award"
+        )
+        for file_path in local_dir.iterdir()
+        if not file_path.stem.startswith("$")
+    ]
+    if not award_files:
+        print("No local award files found.\n")
+    return award_files
+
+
+def prepare_transfers() -> list[FileTransfer]:
+    """Prepare file transfers by converting file paths and directories."""
+
+    transfers: list[FileTransfer] = []
+    for file_path, target_directory in transfers:
+        transfers.append(
+            FileTransfer(
+                file_path=Path(file_path), target_directory=Path(target_directory)
+            )
+        )
+    if award_files := get_award_files():
+        transfers.extend(award_files)
+    return transfers
+
+
+def prepare_transfers():
+    """Prepare file transfers by converting file paths and directories to FileTransfer object."""
+
+    base_transfers: dict[str, str]
+
+    transfers: list[FileTransfer] = []
+
+    for file_path, target_dir in base_transfers.items():
+        transfers.append(
+            FileTransfer(file_path=Path(file_path), target_directory=Path(target_dir))
+        )
+    if local_award_files := get_award_files():
+        transfers.extend(local_award_files)
+
+    for file_transfer in transfers:
+        yield file_transfer
+
+
+def process_transfers():
+    """Process file transfers."""
+
+    with Console().status("Processing file transfers...") as status:
+        for transfer in prepare_transfers():
+            transfer.process_file()
+
+    print("\nProcessing complete.\n")
 
 
 if __name__ == "__main__":
-    _testing = get_testing_mode_selection()
-    main()
+    process_transfers()
