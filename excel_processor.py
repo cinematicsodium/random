@@ -141,5 +141,95 @@ def main():
         sleep(5)
 
 
+#
+# ChatGPT Example 1
+#
+import pandas as pd
+
+
+def merge_employee_functions(input_file: str, output_file: str):
+    # Read the data from the Excel file
+    df = pd.read_excel(input_file)
+
+    # Define columns that uniquely identify each employee
+    identifier_cols = ["name", "UUID", "position", "company", "location"]
+
+    # Group by the identifier columns and merge the functions with double newlines as separator
+    merged_df = df.groupby(identifier_cols, as_index=False)["function"].agg(
+        lambda funcs: "\n\n".join(funcs)
+    )
+
+    # Write the merged data to a new Excel file
+    merged_df.to_excel(output_file, index=False)
+
+    print(f"Data merged successfully. Output saved to {output_file}.")
+
+
 if __name__ == "__main__":
-    main()
+    # Specify input and output file names
+    input_excel = "input.xlsx"
+    output_excel = "merged_output.xlsx"
+
+    merge_employee_functions(input_excel, output_excel)
+
+#
+# ChatGPT Example 2
+#
+import pandas as pd
+
+
+def merge_employee_functions(input_file: str, output_file: str):
+    # Read the data from the Excel file using openpyxl engine, ensuring formula evaluation
+    df = pd.read_excel(input_file, engine="openpyxl")
+
+    # Strip whitespace and drop rows with incomplete identifiers
+    identifier_cols = ["name", "UUID", "position", "company", "location"]
+    df[identifier_cols] = df[identifier_cols].apply(
+        lambda col: col.astype(str).str.strip()
+    )
+    df = df.dropna(subset=identifier_cols)
+
+    # Ensure deterministic order (optional)
+    df.sort_values(by=identifier_cols + ["function"], inplace=True)
+
+    # Group and merge function field
+    merged_df = df.groupby(identifier_cols, as_index=False)["function"].agg(
+        lambda funcs: "\n\n".join(
+            f.strip() for f in funcs if isinstance(f, str) and f.strip()
+        )
+    )
+
+    # Write the merged data to a new Excel file
+    merged_df.to_excel(output_file, index=False, engine="openpyxl")
+
+    print(f"Data merged successfully. Output saved to {output_file}.")
+
+
+#
+# Deepseek Example
+#
+import pandas as pd
+
+# Read the Excel file into a DataFrame
+df = pd.read_excel("input.xlsx")
+
+# Group by UUID and aggregate the data
+merged_df = (
+    df.groupby("UUID")
+    .agg(
+        {
+            "name": "first",
+            "position": "first",
+            "company": "first",
+            "location": "first",
+            "function": lambda x: "\n\n".join(x),
+        }
+    )
+    .reset_index()
+)
+
+# Reorder the columns to match the original structure
+merged_df = merged_df[["name", "UUID", "position", "company", "location", "function"]]
+
+# Write the merged data to a new Excel file
+merged_df.to_excel("output.xlsx", index=False)
