@@ -12,7 +12,9 @@ identifier_cols = ["name", "UUID", "position", "company", "location"]
 
 
 def generate_new(file_path: Path) -> Path:
-    """Generate a unique output file path by modifying the original stem."""
+    """
+    Generate a unique output file path by modifying the original stem.
+    """
     new_path = file_path.with_stem(f"{file_path.stem}_js")
     if new_path.exists():
         counter = 1
@@ -68,6 +70,9 @@ def merge_dataframes(data_frames: list[pd.DataFrame]) -> pd.DataFrame:
 
 
 def main():
+    """
+    Main function to execute the script.
+    """
     if True:
         console.print("\n\n[]Update identifier_cols\n\n")
         exit()
@@ -92,3 +97,7 @@ def main():
     except Exception as e:
         console.print(f"\n[orange1]Error:[/orange1]\n{e}")
         sleep(5)
+
+
+if __name__ == "__main__":
+    main()
