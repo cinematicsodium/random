@@ -4,124 +4,6 @@ install(show_locals=True, width=200)
 
 import re
 
-from nameformatter import NameFormatter
-
-
-class Formatter:
-    @staticmethod
-    def clean(text: str) -> str | None:
-        text = str(text).strip()
-        text = text.encode("ascii", errors="ignore").decode("ascii")
-        text = re.sub(r"[\r\t]+", lambda m: "\n" if m.group(0) == "\r" else " ", text)
-        text = re.sub(r"\n{2,}", "\n", text)
-        text = re.sub(r" {2,}", " ", text)
-        return text.strip() if text else None
-
-    @staticmethod
-    def key(text: str) -> str | None:
-        text = Formatter.clean(text)
-        if not text:
-            return None
-
-        matches = re.findall(r"[a-zA-Z0-9]+", text)
-        return "_".join(matches).lower()
-
-    @staticmethod
-    def name(text: str) -> str | None:
-        text = Formatter.clean(text)
-        if not text:
-            return None
-        return NameFormatter(text).format_last_first()
-
-    @staticmethod
-    def is_list_item(line: str) -> bool:
-        return bool(re.match(r"^[a-zA-Z0-9]{1,3}\.", line))
-
-    @staticmethod
-    def justification(text: str) -> str | None:
-        text = Formatter.clean(text)
-        if not text:
-            return None
-
-        text = text.replace('"', "'")
-        lines = []
-        for line in filter(None, map(str.strip, text.split("\n"))):
-            prefix = (
-                "> "
-                if line and line[0].isalnum() and not Formatter.is_list_item(line)
-                else "    "
-            )
-            lines.append(f"{prefix}{line}")
-        return f'"{"\n".join(lines)}"'
-
-    @staticmethod
-    def extract_int(text: str) -> int:
-        num = 0
-        text = Formatter.clean(text)
-        if not text:
-            return None
-
-        match = re.search(r"([\d,]*\d(?:\.\d+)?)", text)
-        if match:
-            num = float(match.group(1).replace(",", ""))
-            if not num.is_integer():
-                raise ValueError(f"Extracted value '{num}' is not an integer")
-        return int(num)
-
-    @staticmethod
-    def standardized_org_div(text: str) -> str | None:
-        text = Formatter.clean(text)
-        if not text:
-            return None
-
-        return text.replace("-", "").replace(" ", "").lower()
-
-    @staticmethod
-    def _fmtpart(part: str) -> str | None:
-        part = re.sub(r"^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$", "", part)
-        part = re.sub(r"[^a-zA-Z0-9]+", "-", part).upper()
-        part = re.sub(r"-+", "-", part)
-        return part if part else None
-
-    @staticmethod
-    def pay_plan(text: str) -> str | None:
-        text = Formatter.clean(text)
-        if not text:
-            return None
-
-        parts = [
-            Formatter._fmtpart(part)
-            for part in text.split()
-            if Formatter._fmtpart(part)
-        ]
-        return "-".join(parts) if parts else None
-
-formatter = Formatter()
-
-def __test():
-    text = "  This is a test text with   multiple spaces, tabs\tand newlines.\n\n\n"
-    test_map = {
-        "clean": formatter.clean(text),
-        "key": formatter.key(text),
-        "name": formatter.name("John Doe"),
-        "is_list_item": formatter.is_list_item("1. List item"),
-        "justification": formatter.justification("   This is a justification text."),
-        "extract_int": [
-            formatter.extract_int("The number is 1234."),
-            type(formatter.extract_int("The number is 1234.")),
-        ],
-        "standardized_org_div": formatter.standardized_org_div("Org - Division"),
-        "pay_plan": formatter.pay_plan("Pay Plan Example 123"),
-    }
-    for key, value in test_map.items():
-        print(f"{key}: {value}")
-
-
-if __name__ == "__main__":
-    __test()
-
-..................................................
-
 TITLES: list[str] = [
     "dr",
     "mr",
@@ -160,15 +42,6 @@ NAME_PARTICLES = [
     "ov",
     "ev",
 ]
-
-..................................................
-from rich.traceback import install
-
-install(show_locals=True, width=200)
-
-import re
-
-from namecomponents import NAME_PARTICLES, TITLES
 
 ENCLOSED_PATTERN = re.compile(r"(['\"])([a-zA-Z]{1,12})\1|(\()([a-zA-Z]{1,32})(\))")
 CREDENTIALS_PATTERN = re.compile(r"\b[a-zA-Z]{2,4}\.(?:[a-zA-Z])?\.?")
@@ -253,6 +126,8 @@ class NameFormatter:
             if preposition.lower() in NAME_PARTICLES:
                 self.first_name = first_name
                 self.last_name = f"{preposition} {article}"
+            elif first_name.endswith(","):
+                self.last_name, self.first_name, _ = self.name_parts
 
     def extract_names_from_two_parts(self):
         if self.first_name and self.last_name:
@@ -273,7 +148,7 @@ class NameFormatter:
 
     def set_full_name(self):
         if self.first_name and self.last_name:
-            full_name = ", ".join([self.last_name, self.first_name])
+            full_name = ", ".join([self.last_name.replace(",",""), self.first_name])
             capitalized_count: int = len(CAPITALIZED_PATTERN.findall(full_name))
             if not (2 <= capitalized_count <= 5):
                 full_name = full_name.title()
@@ -285,3 +160,95 @@ class NameFormatter:
         if self.full_name:
             return self.full_name
         return self.name_string
+
+class Formatter:
+    @staticmethod
+    def clean(text: str) -> str | None:
+        text = str(text).strip()
+        text = text.encode("ascii", errors="ignore").decode("ascii")
+        text = re.sub(r"[\r\t]+", lambda m: "\n" if m.group(0) == "\r" else " ", text)
+        text = re.sub(r"\n{2,}", "\n", text)
+        text = re.sub(r" {2,}", " ", text)
+        return text.strip() if text else None
+
+    @staticmethod
+    def key(text: str) -> str | None:
+        text = Formatter.clean(text)
+        if not text:
+            return None
+
+        matches = re.findall(r"[a-zA-Z0-9]+", text)
+        return "_".join(matches).lower()
+
+    @staticmethod
+    def name(text: str) -> str | None:
+        text = Formatter.clean(text)
+        if not text:
+            return None
+        return NameFormatter(text).format_last_first()
+
+    @staticmethod
+    def is_list_item(line: str) -> bool:
+        return bool(re.match(r"^[a-zA-Z0-9]{1,3}\.", line))
+
+    @staticmethod
+    def justification(text: str) -> str | None:
+        text = Formatter.clean(text)
+        if not text:
+            return None
+
+        text = text.replace('"', "'")
+        lines = []
+        for line in filter(None, map(str.strip, text.split("\n"))):
+            prefix = (
+                "> "
+                if line and line[0].isalnum() and not Formatter.is_list_item(line)
+                else "    "
+            )
+            lines.append(f"{prefix}{line}")
+        text = "\n".join(lines)
+        return f'"{text}"'
+
+    @staticmethod
+    def extract_int(text: str) -> int:
+        num = 0
+        text = Formatter.clean(text)
+        if not text:
+            return None
+
+        match = re.search(r"([\d,]*\d(?:\.\d+)?)", text)
+        if match:
+            num = float(match.group(1).replace(",", ""))
+            if not num.is_integer():
+                raise ValueError(f"Extracted value '{num}' is not an integer")
+        return int(num)
+
+    @staticmethod
+    def standardized_org_div(text: str) -> str | None:
+        text = Formatter.clean(text)
+        if not text:
+            return None
+
+        return text.replace("-", "").replace(" ", "").lower()
+
+    @staticmethod
+    def _fmtpart(part: str) -> str | None:
+        part = re.sub(r"^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$", "", part)
+        part = re.sub(r"[^a-zA-Z0-9]+", "-", part).upper()
+        part = re.sub(r"-+", "-", part)
+        return part if part else None
+
+    @staticmethod
+    def pay_plan(text: str) -> str | None:
+        text = Formatter.clean(text)
+        if not text:
+            return None
+
+        parts = [
+            Formatter._fmtpart(part)
+            for part in text.split()
+            if Formatter._fmtpart(part)
+        ]
+        return "-".join(parts) if parts else None
+
+formatter = Formatter()
