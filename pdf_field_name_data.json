@@ -1,0 +1,591 @@
+{
+    "approver": {
+        "name": [
+            "0_please_print_3",
+            "0_approving_officialdesignee_1",
+            "0_undefined_20"
+        ],
+        "organization": [
+            "0_org_4",
+            "0_organization_5",
+            "0_undefined_23"
+        ],
+        "signature": [
+            "0_signature_4",
+            "0_signature15"
+        ],
+        "title": [
+            "0_title",
+            "0_undefined_21"
+        ]
+    },
+    "certifier": {
+        "name": [
+            "0_special_act_award_funding_string_2",
+            "0_undefined_12"
+        ],
+        "organization": [
+            "0_org_2",
+            "0_undefined_13"
+        ],
+        "signature": [
+            "0_signature_2",
+            "0_undefined_15",
+            "0_signature11"
+        ]
+    },
+    "funding_org": [
+        "0_organization",
+        "0_undefined_2"
+    ],
+    "funding_string": [
+        "0_special_act_award_funding_string_1",
+        "0_undefined_11"
+    ],
+    "group_name": [
+        "0_employee_name",
+        "0_undefined",
+        "0_group_name"
+    ],
+    "justification": [
+        "3_extent_of_application",
+        "3_extent_of_application_limited_extended_general",
+        "3_extent_of_application_limited_extended_or_general",
+        "2_extent_of_application",
+        "4_extent_of_application"
+    ],
+    "nominator": {
+        "name": [
+            "0_please_print",
+            "0_nominators_name",
+            "0_undefined_7"
+        ],
+        "organization": [
+            "0_org",
+            "0_undefined_8"
+        ],
+        "signature": [
+            "0_signature",
+            "0_undefined_10"
+        ]
+    },
+    "ots_fields": [
+        "0_on_the_spot_award",
+        "0_other_specify",
+        "0_undefined_5",
+        "0_undefined_2",
+        "0_hours"
+    ],
+    "recipients": {
+        "GRP": {
+            "01": {
+                "monetary_amount": [
+                    "1_award_amount",
+                    "1_award_amount_1"
+                ],
+                "name": [
+                    "1_employee_name_1",
+                    "1_employee_name_2",
+                    "1_undefined_33"
+                ],
+                "organization": [
+                    "1_organization",
+                    "1_organization_1",
+                    "1_organization_7"
+                ],
+                "pay_plan": [
+                    "1_pay_plan_gradestep",
+                    "1_pay_plan_gradestep_1",
+                    "1_pay_plan_gradestep_2"
+                ],
+                "supervisor_name": [
+                    "1_immediate_supervisor",
+                    "1_immediate_supervisor_1"
+                ],
+                "time_off_amount": [
+                    "1_time_off_hours",
+                    "1_time_off_hours_1"
+                ]
+            },
+            "02": {
+                "monetary_amount": [
+                    "1_award_amount_2"
+                ],
+                "name": [
+                    "1_employee_name_2",
+                    "1_employee_name_3"
+                ],
+                "organization": [
+                    "1_organization_2",
+                    "1_organization_8"
+                ],
+                "pay_plan": [
+                    "1_pay_plan_gradestep_2",
+                    "1_pay_plan_gradestep_3"
+                ],
+                "supervisor_name": [
+                    "1_immediate_supervisor_2"
+                ],
+                "time_off_amount": [
+                    "1_time_off_hours_2"
+                ]
+            },
+            "03": {
+                "monetary_amount": [
+                    "1_award_amount_3"
+                ],
+                "name": [
+                    "1_employee_name_3",
+                    "1_employee_name_4"
+                ],
+                "organization": [
+                    "1_organization_3",
+                    "1_organization_9"
+                ],
+                "pay_plan": [
+                    "1_pay_plan_gradestep_3",
+                    "1_pay_plan_gradestep_4"
+                ],
+                "supervisor_name": [
+                    "1_immediate_supervisor_3"
+                ],
+                "time_off_amount": [
+                    "1_time_off_hours_3"
+                ]
+            },
+            "04": {
+                "monetary_amount": [
+                    "1_award_amount_4"
+                ],
+                "name": [
+                    "1_employee_name_4",
+                    "1_employee_name_5"
+                ],
+                "organization": [
+                    "1_organization_10",
+                    "1_organization_4"
+                ],
+                "pay_plan": [
+                    "1_pay_plan_gradestep_4",
+                    "1_pay_plan_gradestep_5"
+                ],
+                "supervisor_name": [
+                    "1_immediate_supervisor_4"
+                ],
+                "time_off_amount": [
+                    "1_time_off_hours_4"
+                ]
+            },
+            "05": {
+                "monetary_amount": [
+                    "1_award_amount_5"
+                ],
+                "name": [
+                    "1_employee_name_5",
+                    "1_employee_name_6"
+                ],
+                "organization": [
+                    "1_organization_11",
+                    "1_organization_5"
+                ],
+                "pay_plan": [
+                    "1_pay_plan_gradestep_5",
+                    "1_pay_plan_gradestep_6"
+                ],
+                "supervisor_name": [
+                    "1_immediate_supervisor_5"
+                ],
+                "time_off_amount": [
+                    "1_time_off_hours_5"
+                ]
+            },
+            "06": {
+                "monetary_amount": [
+                    "1_award_amount_6"
+                ],
+                "name": [
+                    "1_employee_name_6",
+                    "1_employee_name_7"
+                ],
+                "organization": [
+                    "1_organization_12",
+                    "1_organization_6"
+                ],
+                "pay_plan": [
+                    "1_pay_plan_gradestep_6",
+                    "1_pay_plan_gradestep_7"
+                ],
+                "supervisor_name": [
+                    "1_immediate_supervisor_6"
+                ],
+                "time_off_amount": [
+                    "1_time_off_hours_6"
+                ]
+            },
+            "07": {
+                "monetary_amount": [
+                    "1_award_amount_7"
+                ],
+                "name": [
+                    "1_employee_name_7",
+                    "1_employee_name_8"
+                ],
+                "organization": [
+                    "1_organization_13",
+                    "1_organization_7"
+                ],
+                "pay_plan": [
+                    "1_pay_plan_gradestep_7",
+                    "1_pay_plan_gradestep_8"
+                ],
+                "supervisor_name": [
+                    "1_immediate_supervisor_7"
+                ],
+                "time_off_amount": [
+                    "1_time_off_hours_7"
+                ]
+            },
+            "08": {
+                "monetary_amount": [
+                    "2_award_amount_8"
+                ],
+                "name": [
+                    "2_employee_name_8",
+                    "2_employee_name_9"
+                ],
+                "organization": [
+                    "2_organization_14",
+                    "2_organization_8"
+                ],
+                "pay_plan": [
+                    "2_pay_plan_gradestep_8",
+                    "2_pay_plan_gradestep_9"
+                ],
+                "supervisor_name": [
+                    "2_immediate_supervisor_8"
+                ],
+                "time_off_amount": [
+                    "2_time_off_hours_8"
+                ]
+            },
+            "09": {
+                "monetary_amount": [
+                    "2_award_amount_9"
+                ],
+                "name": [
+                    "2_employee_name_10",
+                    "2_employee_name_9"
+                ],
+                "organization": [
+                    "2_organization_15",
+                    "2_organization_9"
+                ],
+                "pay_plan": [
+                    "2_pay_plan_gradestep_10",
+                    "2_pay_plan_gradestep_9"
+                ],
+                "supervisor_name": [
+                    "2_immediate_supervisor_9"
+                ],
+                "time_off_amount": [
+                    "2_time_off_hours_9"
+                ]
+            },
+            "10": {
+                "monetary_amount": [
+                    "2_award_amount_10"
+                ],
+                "name": [
+                    "2_employee_name_10",
+                    "2_employee_name_11"
+                ],
+                "organization": [
+                    "2_organization_10",
+                    "2_organization_16"
+                ],
+                "pay_plan": [
+                    "2_pay_plan_gradestep_10",
+                    "2_pay_plan_gradestep_11"
+                ],
+                "supervisor_name": [
+                    "2_immediate_supervisor_10"
+                ],
+                "time_off_amount": [
+                    "2_time_off_hours_10"
+                ]
+            },
+            "11": {
+                "monetary_amount": [
+                    "2_award_amount_11"
+                ],
+                "name": [
+                    "2_employee_name_11",
+                    "2_employee_name_12"
+                ],
+                "organization": [
+                    "2_organization_11",
+                    "2_organization_17"
+                ],
+                "pay_plan": [
+                    "2_pay_plan_gradestep_11",
+                    "2_pay_plan_gradestep_12"
+                ],
+                "supervisor_name": [
+                    "2_immediate_supervisor_11"
+                ],
+                "time_off_amount": [
+                    "2_time_off_hours_11"
+                ]
+            },
+            "12": {
+                "monetary_amount": [
+                    "2_award_amount_12"
+                ],
+                "name": [
+                    "2_employee_name_12",
+                    "2_employee_name_13"
+                ],
+                "organization": [
+                    "2_organization_12",
+                    "2_organization_18",
+                    "PLACEHOLDER_ORG"
+                ],
+                "pay_plan": [
+                    "2_pay_plan_gradestep_12",
+                    "2_pay_plan_gradestep_13"
+                ],
+                "supervisor_name": [
+                    "2_immediate_supervisor_12"
+                ],
+                "time_off_amount": [
+                    "2_time_off_hours_12"
+                ]
+            },
+            "13": {
+                "monetary_amount": [
+                    "2_award_amount_13"
+                ],
+                "name": [
+                    "2_employee_name_13",
+                    "2_employee_name_14"
+                ],
+                "organization": [
+                    "2_organization_13",
+                    "2_organization_19"
+                ],
+                "pay_plan": [
+                    "2_pay_plan_gradestep_13",
+                    "2_pay_plan_gradestep_14"
+                ],
+                "supervisor_name": [
+                    "2_immediate_supervisor_13"
+                ],
+                "time_off_amount": [
+                    "2_time_off_hours_13"
+                ]
+            },
+            "14": {
+                "monetary_amount": [
+                    "2_award_amount_13",
+                    "2_award_amount_14"
+                ],
+                "name": [
+                    "2_employee_name_14",
+                    "2_employee_name_15"
+                ],
+                "organization": [
+                    "2_organization_14",
+                    "2_organization_19",
+                    "2_organization_20"
+                ],
+                "pay_plan": [
+                    "2_pay_plan_gradestep_14",
+                    "2_pay_plan_gradestep_15"
+                ],
+                "supervisor_name": [
+                    "2_immediate_supervisor_13",
+                    "2_immediate_supervisor_14"
+                ],
+                "time_off_amount": [
+                    "2_time_off_hours_13",
+                    "2_time_off_hours_14"
+                ]
+            },
+            "15": {
+                "monetary_amount": [
+                    "2_award_amount_14",
+                    "3_award_amount_15"
+                ],
+                "name": [
+                    "2_employee_name_15",
+                    "3_employee_name_15"
+                ],
+                "organization": [
+                    "2_organization_20",
+                    "3_organization_15"
+                ],
+                "pay_plan": [
+                    "2_pay_plan_gradestep_15",
+                    "3_pay_plan_gradestep_15"
+                ],
+                "supervisor_name": [
+                    "2_immediate_supervisor_14",
+                    "3_immediate_supervisor_15"
+                ],
+                "time_off_amount": [
+                    "2_time_off_hours_14",
+                    "3_time_off_hours_15"
+                ]
+            },
+            "16": {
+                "monetary_amount": [
+                    "3_award_amount_16"
+                ],
+                "name": [
+                    "3_employee_name_16"
+                ],
+                "organization": [
+                    "3_organization_16"
+                ],
+                "pay_plan": [
+                    "3_pay_plan_gradestep_16"
+                ],
+                "supervisor_name": [
+                    "3_immediate_supervisor_16"
+                ],
+                "time_off_amount": [
+                    "3_time_off_hours_16"
+                ]
+            },
+            "17": {
+                "monetary_amount": [
+                    "3_award_amount_17"
+                ],
+                "name": [
+                    "3_employee_name_17"
+                ],
+                "organization": [
+                    "3_organization_17"
+                ],
+                "pay_plan": [
+                    "3_pay_plan_gradestep_17"
+                ],
+                "supervisor_name": [
+                    "3_immediate_supervisor_17"
+                ],
+                "time_off_amount": [
+                    "3_time_off_hours_17"
+                ]
+            },
+            "18": {
+                "monetary_amount": [
+                    "3_award_amount_18"
+                ],
+                "name": [
+                    "3_employee_name_18"
+                ],
+                "organization": [
+                    "3_organization_18"
+                ],
+                "pay_plan": [
+                    "3_pay_plan_gradestep_18"
+                ],
+                "supervisor_name": [
+                    "3_immediate_supervisor_18"
+                ],
+                "time_off_amount": [
+                    "3_time_off_hours_18"
+                ]
+            },
+            "19": {
+                "monetary_amount": [
+                    "3_award_amount_19"
+                ],
+                "name": [
+                    "3_employee_name_19"
+                ],
+                "organization": [
+                    "3_organization_19"
+                ],
+                "pay_plan": [
+                    "3_pay_plan_gradestep_19"
+                ],
+                "supervisor_name": [
+                    "3_immediate_supervisor_19"
+                ],
+                "time_off_amount": [
+                    "3_time_off_hours_19"
+                ]
+            },
+            "20": {
+                "monetary_amount": [
+                    "3_award_amount_20"
+                ],
+                "name": [
+                    "3_employee_name_20"
+                ],
+                "organization": [
+                    "3_organization_20"
+                ],
+                "pay_plan": [
+                    "3_pay_plan_gradestep_20"
+                ],
+                "supervisor_name": [
+                    "3_immediate_supervisor_20"
+                ],
+                "time_off_amount": [
+                    "3_time_off_hours_20"
+                ]
+            },
+            "21": {
+                "monetary_amount": [
+                    "3_award_amount_21"
+                ],
+                "name": [
+                    "3_employee_name_21"
+                ],
+                "organization": [
+                    "3_organization_21"
+                ],
+                "pay_plan": [
+                    "3_pay_plan_gradestep_21"
+                ],
+                "supervisor_name": [
+                    "3_immediate_supervisor_21"
+                ],
+                "time_off_amount": [
+                    "3_time_off_hours_21"
+                ]
+            }
+        },
+        "IND": {
+            "individual": {
+                "monetary_amount": [
+                    "0_amount",
+                    "0_undefined",
+                    "on_the_spot_award"
+                ],
+                "name": [
+                    "0_employee_name"
+                ],
+                "organization": [
+                    "0_organization"
+                ],
+                "pay_plan": [
+                    "0_pay_plan_gradestep"
+                ],
+                "supervisor_name": null,
+                "time_off_amount": [
+                    "0_hours",
+                    "0_hours_2"
+                ]
+            }
+        }
+    },
+    "sas_fields": [
+        "0_hours_2",
+        "0_undefined",
+        "0_undefined_4",
+        "0_undefined_6"
+    ]
+}
